@@ -8,7 +8,7 @@ const bcrypt = require("bcryptjs");
 //Method            POST
 //Endpoint          /api/admin/library
 const createLibrary = asyncHandler(async(req,res)=>{
-    const { name , slug , address , contactNumber , email } = req.body;
+    const { name , slug , address , contactNumber , email , fine , lostFine } = req.body;
     
     if( !name || !slug || !address || !contactNumber || !email){
         return res.status(400).json({
@@ -44,6 +44,8 @@ const createLibrary = asyncHandler(async(req,res)=>{
         address,
         contactNumber,
         email : loweredEmail,
+        fine,
+        lostFine
     });
 
     res.status(201).json({
@@ -52,7 +54,9 @@ const createLibrary = asyncHandler(async(req,res)=>{
         slug : library.slug,
         address : library.address,
         contactNumber : library.contactNumber,
-        email : library.email
+        email : library.email,
+        fine : library.fine,
+        lostFine : library.lostFine
     });
 });
 
