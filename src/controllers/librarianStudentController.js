@@ -2,6 +2,29 @@ const asyncHandler = require("express-async-handler");
 const mongoose = require('mongoose');
 const User = require('../models/UserModel');
 
+const findStudentByLibrary = async (studentId, libraryId) => {
+
+    if (!mongoose.Types.ObjectId.isValid(studentId)) {
+        const error = new Error("Invalid student ID");
+        error.status = 400;
+        throw error;
+    }
+
+    const student = await User.findOne({
+        _id: studentId,
+        role: "student",
+        libraryId
+    });
+
+    if (!student) {
+        const error = new Error("Student not found");
+        error.status = 404;
+        throw error;
+    }
+
+    return student;
+
+};
 
 //Description       Get approval pending students
 //Method            GET
@@ -12,7 +35,8 @@ const getPendingStudents = asyncHandler(async(req,res)=>{
         role : "student",
         status : "pending" , 
         libraryId : req.user.libraryId
-    }).select("-password");
+    }).select("-password")
+    .lean();
 
     res.status(200).json({
         count: pendingStudents.length,
@@ -24,23 +48,8 @@ const getPendingStudents = asyncHandler(async(req,res)=>{
 //Method            PUT
 //Endpoint          /api/librarian/approve/:id
 const approveStudent = asyncHandler(async(req,res)=>{
-    const studentId = req.params.id;
 
-    if (!mongoose.Types.ObjectId.isValid(studentId)) {
-        res.status(400);
-        throw new Error("Invalid student ID");
-    }
-
-    const student = await User.findOne({
-        _id : studentId,
-        role : "student",
-        libraryId : req.user.libraryId
-    });
-
-    if(!student){
-        res.status(404);
-        throw new Error("Student not found");
-    }
+    const student = await findStudentByLibrary( req.params.id , req.user.libraryId );
 
     if(student.status !== "pending"){
         res.status(400);
@@ -60,23 +69,8 @@ const approveStudent = asyncHandler(async(req,res)=>{
 //Method            PUT
 //Endpoint          /api/librarian/reject/:id
 const rejectStudent = asyncHandler(async(req,res)=>{
-    const studentId = req.params.id;
 
-    if (!mongoose.Types.ObjectId.isValid(studentId)) {
-        res.status(400);
-        throw new Error("Invalid student ID");
-    }
-
-    const student = await User.findOne({
-        _id : studentId,
-        role : "student",
-        libraryId : req.user.libraryId
-    });
-
-    if(!student){
-        res.status(404);
-        throw new Error("Student not found");
-    }
+    const student = await findStudentByLibrary( req.params.id , req.user.libraryId);
 
     if(student.status !== "pending"){
         res.status(400);
@@ -98,23 +92,7 @@ const rejectStudent = asyncHandler(async(req,res)=>{
 //Endpoint          /api/librarian/block/:id
 const blockStudent = asyncHandler(async(req,res)=>{
     
-    const studentId = req.params.id;
-
-    if (!mongoose.Types.ObjectId.isValid(studentId)) {
-        res.status(400);
-        throw new Error("Invalid student ID");
-    }
-
-    const student = await User.findOne({
-        _id : studentId,
-        role : "student",
-        libraryId : req.user.libraryId
-    });
-
-    if(!student){
-        res.status(404);
-        throw new Error("Student not found");
-    }
+    const student = await findStudentByLibrary( req.params.id , req.user.libraryId);
 
     if(student.status !== "approved"){
         res.status(400);
@@ -137,23 +115,7 @@ const blockStudent = asyncHandler(async(req,res)=>{
 
 const unblockStudent = asyncHandler(async (req, res) => {
 
-    const studentId = req.params.id;
-
-    if (!mongoose.Types.ObjectId.isValid(studentId)) {
-        res.status(400);
-        throw new Error("Invalid student ID");
-    }
-
-    const student = await User.findOne({
-        _id: studentId,
-        role: "student",
-        libraryId: req.user.libraryId
-    });
-
-    if (!student) {
-        res.status(404);
-        throw new Error("Student not found");
-    }
+    const student = await findStudentByLibrary( req.params.id , req.user.libraryId);
 
     if (student.status !== "blocked") {
         res.status(400);
@@ -169,7 +131,6 @@ const unblockStudent = asyncHandler(async (req, res) => {
     });
 
 });
-
 
 module.exports = {
 

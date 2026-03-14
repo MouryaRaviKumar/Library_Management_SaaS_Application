@@ -25,6 +25,10 @@ const bookSchema = new mongoose.Schema({
     isAvailable: {
         type: Boolean,
         default: true
+    },
+    isLost : {
+        type : Boolean,
+        default : false,
     }
 }, {
     timestamps: true

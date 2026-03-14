@@ -32,7 +32,6 @@ const librarySchema = new mongoose.Schema({
     },
     isActive : {
         type : Boolean,
-        enum : [true , false],
         default : true
     },
     fine : {
