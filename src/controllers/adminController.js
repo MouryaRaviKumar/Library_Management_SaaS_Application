@@ -226,6 +226,7 @@ const createLibrarian = asyncHandler(async(req,res)=>{
         address,
         mobile,
         role : "librarian",
+        status : "approved"
     });
 
     res.status(201).json({
