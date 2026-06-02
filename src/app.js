@@ -10,6 +10,8 @@ const librarianBookRoutes = require("./routes/librarianBookRoutes.js");
 const protected = require("./middleware/authMiddleware.js");
 const limiter = require("./middleware/rateLimiter.js");
 const adminOnly = require("./middleware/adminOnly.js");
+const librarianOnly = require('./middleware/librarianOnly.js');
+const blockedUser = require("./middleware/BlockedUser.js");
 
 app.use(express.json());
 app.use(express.urlencoded({extended : true}));
@@ -17,15 +19,15 @@ app.use(express.urlencoded({extended : true}));
 app.use(limiter);
 
 app.use("/api/auth", authRoutes );
-app.use("/api/admin", protected ,adminOnly, adminRoutes );
-app.use("/api/books", protected , bookRoutes );
-app.use("/api/user", protected , userRoutes );
+app.use("/api/admin", protected , adminOnly , adminRoutes );
+app.use("/api/books", protected ,blockedUser, bookRoutes );
+app.use("/api/user", protected ,blockedUser, userRoutes );
 
 //Librarian Student Management Routes
-app.use("/api/librarian", protected , librarianStudentRoutes );
+app.use("/api/librarian", protected ,blockedUser , librarianOnly, librarianStudentRoutes );
 
 //Librarian Books Borrowing Management Routes
-app.use("/api/librarian", protected , librarianBookRoutes );
+app.use("/api/librarian", protected ,blockedUser , librarianOnly, librarianBookRoutes );
 
 app.use((req,res)=>{
     res.status(404).json({ message : "Route not found "});
